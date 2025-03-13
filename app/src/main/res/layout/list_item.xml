@@ -24,21 +24,23 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                android:id="@+id/author"
-                android:text="Author"/>
+                app:layout_constraintEnd_toStartOf="@id/delteButton"
+                app:layout_constraintHorizontal_bias="0"
+                android:id="@+id/author" />
 
 
             <TextView
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/author"
-                android:layout_width="wrap_content"
+                app:layout_constraintEnd_toStartOf="@id/delteButton"
+                app:layout_constraintHorizontal_bias="0"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/title"
-                android:textSize="20sp"
-                android:text="Title"/>
+                android:textSize="20sp" />
 
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"

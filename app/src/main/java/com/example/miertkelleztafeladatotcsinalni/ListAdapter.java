@@ -1,6 +1,8 @@
 package com.example.miertkelleztafeladatotcsinalni;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,43 +10,88 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.List;
+import java.util.zip.Inflater;
 
-public class ListAdapter extends BaseAdapter {
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     private List<Book> items;
-    private Context context;
+    private boolean modify;
 
-    public ListAdapter(Context context, List<Book> items) {
+    public ListAdapter(List<Book> items, boolean modify) {
         this.items = items;
+        this.modify = modify;
+    }
+
+
+    @NonNull
+    @Override
+    public ListAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent, false);
+        return new ListAdapter.ViewHolder(view);
     }
 
     @Override
-    public int getCount() {
+    public void onBindViewHolder(@NonNull ListAdapter.ViewHolder holder, int position) {
+        holder.bind(position);
+    }
+
+    @Override
+    public int getItemCount() {
         return items.size();
     }
 
-    @Override
-    public Object getItem(int i) {
-        return items.get(i);
-    }
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        public TextView title;
+        public TextView author;
+        public Button delete;
+        private Book item;
+        private int position;
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            title = itemView.findViewById(R.id.title);
+            author = itemView.findViewById(R.id.author);
+            delete = itemView.findViewById(R.id.delteButton);
+            if (modify) {
+                delete.setText(R.string.modify_text);
+                delete.setOnClickListener(v -> {
+                    MainActivity.getInstance().navigateTo(new ModifyFragment(item));
+                });
+            }
+            else delete.setOnClickListener(v -> {
+                MainActivity.getApi().delete(item.id).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            items.remove(position);
+                            notifyItemRemoved(position);
+                        } else new AlertDialog.Builder(itemView.getContext())
+                                .setTitle("Error deleting book")
+                                .show();
+                    }
 
-    @Override
-    public long getItemId(int i) {
-        return items.get(i).id;
-    }
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable throwable) {
+                        new AlertDialog.Builder(itemView.getContext())
+                                .setTitle("Error deleting book")
+                                .setMessage(throwable.getMessage())
+                                .show();
+                    }
+                });
+            });
+        }
 
-    @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        view = inflater.inflate(R.layout.list_item, viewGroup, false);
-
-        Book book = items.get(i);
-        ((TextView)view.findViewById(R.id.title)).setText(book.Title);
-        ((TextView)view.findViewById((R.id.author))).setText(book.Author);
-        ((Button)view.findViewById(R.id.delteButton)).setOnClickListener(v -> {
-            APIInstance.getInstance().
-        });
-
-        return view;
+        public void bind(int position) {
+            this.position = position;
+            this.item = items.get(position);
+            title.setText(item.Title);
+            author.setText(item.Author);
+        }
     }
 }
